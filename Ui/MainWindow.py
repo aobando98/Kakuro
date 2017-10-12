@@ -5,6 +5,9 @@ import Tkinter as tk
 from Tkinter import StringVar, Tk, Spinbox, Button
 from _tkinter import mainloop
 from cgitb import text
+from __builtin__ import str
+from pipes import stepkinds
+from _ast import Str
 
 
 
@@ -17,7 +20,6 @@ def redraw(matrix):
     gameframe.pack()
 
     for i,row in enumerate(matrix):
-
         for j,column in enumerate(row):
             if matrix[i][j]==0:   
                 L = tk.Label(gameframe,text='    ',bg= "gray")
@@ -25,72 +27,153 @@ def redraw(matrix):
             else:
                 L = tk.Label(gameframe,text='    ',bg= "black")
                 L.grid(row=i,column=j,padx='1',pady='1')
-#------------------------------------------------------------------------
+#---------------------------------------------------------------------------------------------------------
 
+
+#---------------------------------------------------------------------------------------------------------
+def generarTuplas(matrizFinal):
+    a=""
+    #Imprime matriz en consola        
+    for k in range(len(matrizFinal[0])):
+        for j in range(len(matrizFinal[0])):
+            a+=str(matrizFinal[k][j])+'\t'
+        print (a)
+        a=""
+    print("\n")
+    
+    
+    
+    for i in range(1,len(matrizFinal[0])):
+        for j in range(1, len(matrizFinal[0])):
+            flag = True
+            while matrizFinal[i][j]==1 and flag==True:
+                numeroCasilla  = random.randint(1,9)
+                if verificarSumaFila(matrizFinal, i, j, numeroCasilla)==True: 
+                    matrizFinal[i][j]=numeroCasilla
+                    flag =False
+                else:
+                    pass
+    return matrizFinal
+#---------------------------------------------------------------------------------------------------------
+
+#Funciones que verifican cuales valores se posicionan en la tupla-----------------------------------------------------------------
+def verificarSumaFila(matrizFinal,i,j,numeroCasilla):
+    while matrizFinal[i][j]!=0:
+        j-=1
+    j+=1
+    
+    while matrizFinal[i][j]!=0 and len(matrizFinal[0])>=j:
+        if matrizFinal[i][j]== numeroCasilla:
+            return False
+        else:
+            j+=1
+    return True
+        
+        
+def verificarSumaColumna(matrizKakuro,i,j,numeroCasilla):
+    while matrizKakuro[i][j]!=0:
+        i-=1
+    i+=1
+    while matrizKakuro[i][j]!=0:
+        if matrizKakuro[i][j]== numeroCasilla:
+            return False
+        else:
+            i+=1
+            
+    return True
+#---------------------------------------------------------------------------------------------------------------------------------    
+    
+    
+#Revisa si existen casillas blancas entre dos negras y la elimina-----------------------------------------
+
+def revisarAdyacencias(matrizAdyacencias):
+    
+    for i in range(1,len(matrizAdyacencias[0])-1):
+        for j in range(1,len(matrizAdyacencias[0])-1):
+            if matrizAdyacencias[i][j]==1 and matrizAdyacencias[i][j-1]==0 and matrizAdyacencias[i][j+1]==0 and matrizAdyacencias[i-1][j]==0 and matrizAdyacencias[i+1][j]==0:
+                print ("Cambio de casilla por adyacencia en: "+ "Fila: "+ str(i)+ "Columna: "+str(j) )
+                matrizAdyacencias[i][j]=0
+              
+    matrizTupla = generarTuplas(matrizAdyacencias)
+    return matrizTupla
+
+#--------------------------------------------------------------------------------------------------------
 
 #Valida si una fila o una columna tiene mas de 9 casillas------------------------------------------
-def validar9Casillas(matrix):
-    numeroBlancasFila =0
-    numeroBlancasColumna= 0
-    for i in range(1,len(matrix[0])):
-        for j in range(1,len(matrix[0])):
-            if matrix[i][j]==1:
+def validar9Casillas(matrizKakuro):
+
+    for i in range(1,len(matrizKakuro[0])):
+        numeroBlancasFila =0
+        for j in range(1,len(matrizKakuro[0])):
+            if matrizKakuro[i][j]== 1 :
                 numeroBlancasFila+=1
-                if numeroBlancasFila==9:
-                    matrix[i][j]=0
+                if numeroBlancasFila>9:
+                    print ("Cambio casilla blanca por negra en  "+ "Fila: "+ str(i)+ "Columna:"+ str(j))
+                    matrizKakuro[i][j]=0
+                    numeroBlancasFila = 0
                 else:
                     pass
             else:
-                pass                      
-                    
-    for i in range(1,len(matrix[0])):
-        for j in range(1,len(matrix[0])):
-            if matrix[j][i]==1:
+                numeroBlancasFila=0     
+
+
+    for i in range(1,len(matrizKakuro[0])):
+        numeroBlancasColumna= 0
+        for j in range(1,len(matrizKakuro[0])):
+            if matrizKakuro[j][i]==1:
                 numeroBlancasColumna+=1
-                if numeroBlancasColumna==9:
-                    matrix[j][i]=0
+                if numeroBlancasColumna>9:
+                    print ("Cambio casilla blanca por negra en  "+ "columna: "+ str(j)+ "fila:"+ str(i))
+                    matrizKakuro[j][i]=0
+                    numeroBlancasColumna= 0
                 else:
                     pass
             else:
-                pass
-            
-    return matrix  
+                numeroBlancasColumna =0
+        
+    matrizAdyacencias = revisarAdyacencias(matrizKakuro)  
+    return matrizAdyacencias  
+     
 #------------------------------------------------------------------------                
 
 #Genera casillas aleatorias con una pequena probabilidad---------------------------------------------
 def generateRndm():
-    casillas1 = [(0,0),1]
     casillas =['0','1']
-    pesos = [0.2,0.8]
+    pesos = [0.3,0.7]
     resultado= []
     
     for e, p in zip(casillas, pesos):
         resultado += [e] * int(p * 100)
         
     return random.choice(resultado)
-        
-        
-        
-        
-        
+#-----------------------------------------------------------------------------------------------------
+    
 #Funcion que una matriz del tamano dado----------------------------------------------------------------
 def crearMatriz(filas, columnas):
-    matrizKakuro = []
+    matrizInicial = []
     a = ""
     #Crea la matriz del tamano indicado
     for k in range(filas):
-        matrizKakuro.append([1]*columnas)
+        matrizInicial.append([1]*columnas)
     #Inicializa toda la primera columna y fila con campos en negro    
     for i in range(filas):
-        matrizKakuro[0][i]=0
-        matrizKakuro[i][0]=0
+        matrizInicial[0][i]=0
+        matrizInicial[i][0]=0
         
     #Genera espacios aleatorios en el kakuro    
     for k in range(1,filas):
         for j in range(1,columnas):
-            matrizKakuro[k][j]= generateRndm()
+            matrizInicial[k][j]= generateRndm()
+            
+    for i in range(1,len(matrizInicial[0])):
+        for j in range(1,len(matrizInicial[0])):
+            if matrizInicial[i][j]=='1':
+                matrizInicial[i][j]=1
+            else:
+                matrizInicial[i][j]=0             
+    
     #Llama a funcion para validar espacios        
-    matrizFinal =  validar9Casillas(matrizKakuro)
+    matrizFinal =  validar9Casillas(matrizInicial)
     
     
     #Imprime matriz en consola        
@@ -99,8 +182,7 @@ def crearMatriz(filas, columnas):
             a+=str(matrizFinal[k][j])+'\t'
         print (a)
         a=""
-        
-    #redraw(matrizKakuro)
+    
 #--------------------------------------------------------------------------------------         
              
 
