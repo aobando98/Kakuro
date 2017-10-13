@@ -8,6 +8,7 @@ from cgitb import text
 from __builtin__ import str
 from pipes import stepkinds
 from _ast import Str
+from getpass import fallback_getpass
 
 
 
@@ -28,27 +29,29 @@ def redraw(matrix):
                 L = tk.Label(gameframe,text='    ',bg= "black")
                 L.grid(row=i,column=j,padx='1',pady='1')
 #---------------------------------------------------------------------------------------------------------
-
+'''
+def generarTuplas(matrizFinal):
+    sumaFila = 0
+    sumaColumna = 0
+    
+    for i in range(1,len(matrizFinal[0])):
+        for j in range(1,len(matrizFinal[0])):
+            if matrizFinal[i][j]==0:
+                matrizFinal[i][j]= (0,0)
+                
+    return matrizFinal
+                
+'''
 
 #---------------------------------------------------------------------------------------------------------
-def generarTuplas(matrizFinal):
-    a=""
-    #Imprime matriz en consola        
-    for k in range(len(matrizFinal[0])):
-        for j in range(len(matrizFinal[0])):
-            a+=str(matrizFinal[k][j])+'\t'
-        print (a)
-        a=""
-    print("\n")
-    
-    
-    
+def revisarCasillasBlanca1(matrizFinal):
+
     for i in range(1,len(matrizFinal[0])):
         for j in range(1, len(matrizFinal[0])):
             flag = True
-            while matrizFinal[i][j]==1 and flag==True:
+            while matrizFinal[i][j]!=0 and flag==True:
                 numeroCasilla  = random.randint(1,9)
-                if verificarSumaFila(matrizFinal, i, j, numeroCasilla)==True: 
+                if verificarSumaFila(matrizFinal, i, j, numeroCasilla)==True and verificarSumaColumna(matrizFinal, i, j, numeroCasilla)==True: 
                     matrizFinal[i][j]=numeroCasilla
                     flag =False
                 else:
@@ -57,28 +60,89 @@ def generarTuplas(matrizFinal):
 #---------------------------------------------------------------------------------------------------------
 
 #Funciones que verifican cuales valores se posicionan en la tupla-----------------------------------------------------------------
-def verificarSumaFila(matrizFinal,i,j,numeroCasilla):
+def verificarSumaFila1(matrizFinal,i,j,numeroCasilla):
+        while matrizFinal[i][j]!=0:
+            j-=1
+        j+=1
+        while matrizFinal[i][j]!=0 :
+            print ("Error puede estar en la celda: "+"Fila: "+ str(i)+" Columna: "+ str(j))
+            if matrizFinal[i][j]== numeroCasilla:
+                return False
+            else:
+                j+=1
+        return True
+
+        
+def verificarSumaColumna1(matrizFinal,i,j,numeroCasilla):
     while matrizFinal[i][j]!=0:
-        j-=1
-    j+=1
-    
-    while matrizFinal[i][j]!=0 and len(matrizFinal[0])>=j:
-        if matrizFinal[i][j]== numeroCasilla:
-            return False
-        else:
-            j+=1
-    return True
-        
-        
-def verificarSumaColumna(matrizKakuro,i,j,numeroCasilla):
-    while matrizKakuro[i][j]!=0:
         i-=1
     i+=1
-    while matrizKakuro[i][j]!=0:
-        if matrizKakuro[i][j]== numeroCasilla:
-            return False
+    while matrizFinal[i][j]!=0:
+        if numeroCasilla==1:
+            return True
         else:
-            i+=1
+            if matrizFinal[i][j]== numeroCasilla:
+                return False
+            else:
+                i+=1
+            
+            
+    return True
+
+
+#---------------------------------------------------------------------------------------------------------
+def revisarCasillasBlanca(matrizFinal, numeroFilas):
+    
+    listaRevision = [0]*(numeroFilas+1)
+    for i in range(numeroFilas):
+        matrizFinal[i].append(0)
+    matrizFinal.append(listaRevision)
+    
+    
+    for i in range(1,len(matrizFinal[0])):
+        for j in range(1, len(matrizFinal[0])):
+            flag = True
+            while matrizFinal[i][j]==1 and flag==True:
+                numeroCasilla  = random.randint(1,9)
+                if verificarSumaFila(matrizFinal, i, j, numeroCasilla)==True and verificarSumaColumna(matrizFinal, i, j, numeroCasilla)==True: 
+                    matrizFinal[i][j]=numeroCasilla
+                    flag =False
+                else:
+                    pass
+    #matrizBack= eliminarRepeticiones(matrizFinal)
+    return matrizFinal
+#---------------------------------------------------------------------------------------------------------
+
+#Funciones que verifican cuales valores se posicionan en la tupla-----------------------------------------------------------------
+def verificarSumaFila(matrizFinal,i,j,numeroCasilla):
+        while matrizFinal[i][j]!=0:
+            j-=1
+        j+=1
+        while matrizFinal[i][j]!=0 :
+            print ("Error puede estar en la celda: "+"Fila: "+ str(i)+" Columna: "+ str(j))
+            if numeroCasilla ==1:
+                return True
+            else:
+                if matrizFinal[i][j]== numeroCasilla:
+                    return False
+                else:
+                    j+=1
+        return True
+
+        
+def verificarSumaColumna(matrizFinal,i,j,numeroCasilla):
+    while matrizFinal[i][j]!=0:
+        i-=1
+    i+=1
+    while matrizFinal[i][j]!=0:
+        if numeroCasilla==1:
+            return True
+        else:
+            if matrizFinal[i][j]== numeroCasilla:
+                return False
+            else:
+                i+=1
+            
             
     return True
 #---------------------------------------------------------------------------------------------------------------------------------    
@@ -94,7 +158,7 @@ def revisarAdyacencias(matrizAdyacencias):
                 print ("Cambio de casilla por adyacencia en: "+ "Fila: "+ str(i)+ "Columna: "+str(j) )
                 matrizAdyacencias[i][j]=0
               
-    matrizTupla = generarTuplas(matrizAdyacencias)
+    matrizTupla = revisarCasillasBlanca(matrizAdyacencias, len(matrizAdyacencias[0]))
     return matrizTupla
 
 #--------------------------------------------------------------------------------------------------------
