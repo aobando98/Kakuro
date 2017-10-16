@@ -9,26 +9,32 @@ from __builtin__ import str
 from pipes import stepkinds
 from _ast import Str
 from getpass import fallback_getpass
+import tkFileDialog
+import tkMessageBox
 
-global matrizKakuroFinal 
 matrizKakuroFinal =""
 
 
 
+#Manejo de archivos para abrir y guardar kakuros------------------------------------------------------------
 def saveFile(matrizKakuro):
-    a=""
-    #matriz = matrizKakuro
-    #saveKakuro = open('Matrix')
-    for k in range(len(matrizKakuro[0])):
-        for j in range(len(matrizKakuro[0])):
-            a+=str(matrizKakuro[k][j])+'\t'
-        print (a)
-        a=""
+    f = tkFileDialog.asksaveasfile(mode= 'w', defaultextension= '.txt')
+    if f is None:
+        return
+    txtSave = str(matrizKakuro)
+    f.write(txtSave)
+    f.close()
+    tkMessageBox.showinfo("Manejo de Arhivos", "Kakuro Guardado")
+    
 
 
-
-
-
+def openFile():
+    
+    filename = tkFileDialog.askopenfile(filetypes=[("Text files","*.txt")])
+    txt = filename.read()   
+    print txt
+    filename.close()
+#------------------------------------------------------------------------------------------------------------
 
 #------------------------------------------------------------------------
 def redraw(matrix):
@@ -96,7 +102,6 @@ def verificarTuplaCol(matrizFinal, i, j, sumaColumna):
             sumaColumna+= matrizFinal[i][j]
             i+=1
         return sumaColumna 
-    
     
 def verificarTuplaFila(matrizFinal, i, j, sumaFila):
     if j >= (len(matrizFinal[0])-2):
@@ -277,7 +282,6 @@ def crearMatriz(filas, columnas):
         print (a)
         a=""
 #--------------------------------------------------------------------------------------         
-             
 
 #Funcion que obtiene del spinbox el tamano del kakuro----------------------------------
 def obtener(): #Llama a funcion que crea la matriz
@@ -316,8 +320,9 @@ window.geometry("1024x600")
 kSize =  Spinbox(window,values = ("10x10","11x11","12x12","13x13","14x14","15x15","16x16","17x17","18x18","19x19","20x20"), textvariable= value).place(x=420, y= 500)
 buttonCreate = Button(window, text= "Generar Kakuro", command = obtener).place(x=375, y=530)  
 buttonSolve = Button(window, text = "Resolver Kakuro").place(x=475, y=530)
-buttonAbrir  = Button(window, text = "Abrir Kakuro Generado").place(x=580, y=530)
 buttonGuardar = Button(window, text = "Guardar Kakuro Generado", command = lambda: saveFile(matrizKakuroFinal)).place(x=220, y=530)
+buttonAbrir  = Button(window, text = "Abrir Kakuro Generado", command= lambda: openFile()).place(x=580, y=530)
+
 
 
 
