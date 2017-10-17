@@ -307,6 +307,13 @@ def fullPrePoda(kakuro):
                     
             else:
                 pass
+
+
+    for i in range(len(kakuro[0])):
+        for j in range (len(kakuro[0])):
+            if type(kakuro[i][j])==set:
+                kakuro[i][j]= list(kakuro[i][j])
+                   
     return kakuro
 ################################################################################
 
