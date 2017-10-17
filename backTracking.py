@@ -60,6 +60,10 @@ finalResult: must start as []
 partial: must start as []
 '''
 def combinaciones(numbers, target, allowedSpaces, finalResult, partial):
+    # Special case for one space number
+    if allowedSpaces == 1:
+        return [target]
+    
     # We have to make sure we don't use the target number
     if target in numbers:
         numbers.remove(target)
@@ -136,6 +140,10 @@ def removePosSolutionPre(vector_1, vector_2):
         return [vector_1, vector_2]
 ###############################################################################
 
+'''
+Funcion para eliminar posibles combinaciones durante
+el backTracking
+'''
 def removePosSolutionRun(vector_1, tablero):
     if len(vector_1[0]) <= (len(tablero) - tablero.count(0)):
     # Si se cumple la condicion empezamos a tratar de eliminar los
@@ -148,13 +156,15 @@ def removePosSolutionRun(vector_1, tablero):
         return vector_1
 ###############################################################
 
+'''
+Funcion que cuenta cuantos espacios son para cada
+numero en el kakuro
+'''
 def cuentaEspacios(kakuro, i, j, direccion):
     # Si es para una fila
     if direccion == 1:
         contador = 0
         for x in range(j + 1, len(kakuro[i])):
-            print("Fila")
-            print("Elemnto" , i,x, "=", kakuro[i][x])
             if kakuro[i][x] == 0:
                 contador += 1
             else:
@@ -165,13 +175,12 @@ def cuentaEspacios(kakuro, i, j, direccion):
     elif direccion == 2:
         contador = 0
         for x in range(i + 1, len(kakuro)):
-            print("Columna")
-            print("Elemnto", x,j, "=", kakuro[x][j])
             if kakuro[x][j] == 0:
                 contador += 1
             else:
                 break
         return contador
+###############################################################
     
 
 '''
@@ -211,7 +220,6 @@ def preBackTracking(kakuro):
                                                   [],[])
                     kakuro[i][j][1] = [kakuro[i][j][1], posibilidades]
     return kakuro
-                
 ###############################################################
                 
 """
@@ -242,6 +250,104 @@ def permuta(c):
                 for s in permuta(c[1:])],
                [])
 ###############################################################
+
+'''
+Funcion para saber si un campo de una fila se comparte con una columna
+retorna: None si no se comparte
+         Una lista con el indice del numero de la fila y el numero de la columna
+'''
+def interseccion(i_entrada, j_entrada, kakuro):
+    new_i = i_entrada - 1
+    for x in range(0, len(kakuro[0])):
+        if kakuro[new_i][j_entrada] == 0:
+            new_i -= 1
+        elif type(kakuro[new_i][j_entrada]) == set:
+            new_i -= 1
+        elif kakuro[new_i][j_entrada][0] == 0:
+            # Si no encuentra una interseccion devuelve none
+            return None
+        else:
+            return [new_i, j_entrada]
+###############################################################
+
+'''
+Funcion para ejecutar toda la pre poda
+antes 
+'''
+def fullPrePoda(kakuro):
+    kakuro = preBackTracking(kakuro)
+    kakuro_comb = kakuro
+    # Desde uno porque en la primera fila no se pueden poner numeros
+    # el - 1 es porque la ultima columna es de ceros y la ultima fila tambien 
+    for i in range(1, len(kakuro) - 1):
+        for j in range(0, len(kakuro[0]) - 1):
+            # En este caso si ejecutamos la pre poda
+            if kakuro[i][j] == 0:
+                kakuro[i][j] = posibles(i, j, kakuro_comb)
+            elif kakuro [i][j] == [0,0]:
+                pass
+            elif kakuro[i][j][1] == 0:
+                pass
+            elif kakuro[i][j][1][0] != 0:
+                for x in range(j + 1, len(kakuro[0]) - 1):
+                    # Empezamos a probar con cada espacio blanco
+                    if kakuro[i][x] == 0:
+                        # Si el espacio esta en blanco probamos las intersecciones
+                        # Vemos si tiene alguna interseccion
+                        lista_analisis = interseccion(i, x, kakuro)
+                        # Si tiene alguna interseccion se hace el analisis
+                        if lista_analisis != None:
+                            posV2 = lista_analisis
+                            nuevos_vectores = removePosSolutionPre(
+                                kakuro[i][j][1][1],
+                                kakuro[posV2[0]][posV2[1]][0][1])
+                            # ahora cambiamos los vectores
+                            kakuro[i][j][1][1] = nuevos_vectores[0]
+                            kakuro[posV2[0]][posV2[1]][0][1] = nuevos_vectores[1]
+                    
+            else:
+                pass
+    return kakuro
+################################################################################
+
+def posibles(i_entrada, j_entrada, kakuro):
+    nuevo_conjunto = set()
+    new_i = i_entrada - 1
+    for x in range(0, len(kakuro[0])):
+        if kakuro[new_i][j_entrada] == 0:
+            new_i -= 1
+        elif type(kakuro[new_i][j_entrada]) == set:
+            new_i -= 1
+        elif kakuro[new_i][j_entrada][0] == 0:
+            # Si no encuentra una interseccion para
+            break
+        else:
+            for x in range(0, len(kakuro[new_i][j_entrada][0][1])):
+                conjunto_temp = kakuro[new_i][j_entrada][0][1][x]
+                conjunto_temp = set(conjunto_temp)
+                # Unimos los conjuntos
+                nuevo_conjunto = nuevo_conjunto | conjunto_temp
+    new_j = j_entrada - 1
+    for y in range(0, len(kakuro)):
+        if kakuro[i_entrada][new_j] == 0:
+            new_j -= 1
+        elif type(kakuro[i_entrada][new_j]) == set:
+            new_j -= 1
+        elif kakuro[i_entrada][new_j][1] == 0:
+            # Si no encuentra una interseccion para
+            break
+        else:
+            for x in range(0, len(kakuro[i_entrada][new_j][1][1])):
+                conjunto_temp = kakuro[i_entrada][new_j][1][1][x]
+                conjunto_temp = set(conjunto_temp)
+                # Unimos los conjuntos
+                nuevo_conjunto = nuevo_conjunto | conjunto_temp
+    return nuevo_conjunto
+        
+                
+             
+            
+        
 
         
     
