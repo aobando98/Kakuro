@@ -1,6 +1,26 @@
 '''
 Python class to get the solution of a kakuro puzzle
 '''
+'''
+import random
+import Tkinter as tk
+from Tkinter import StringVar, Tk, Spinbox, Button
+from _tkinter import mainloop
+from cgitb import text
+from __builtin__ import str
+from pipes import stepkinds
+from _ast import Str
+from getpass import fallback_getpass
+import tkFileDialog
+import tkMessageBox
+
+#Variables globales--------------
+
+global matrizBooleana
+global gameframe
+#--------------------------------
+matrizKakuroFinal =""
+'''
 
 ###############################################################
 '''
@@ -96,6 +116,8 @@ vector_2: where we check if the number are in, must be a list
 returns: True if we can delete the given vector, False if we can't
 '''
 def checkPosRemove(vector_1, vector_2):
+    if type(vector_1) == int or type(vector_2) == int:
+        return False
     for x in range(0, len(vector_1)):
         if vector_1[x] in vector_2:
             return False
@@ -320,6 +342,7 @@ def fullPrePoda(kakuro):
 def posibles(i_entrada, j_entrada, kakuro):
     nuevo_conjunto = set()
     new_i = i_entrada - 1
+    #print("Arriba")
     for x in range(0, len(kakuro[0])):
         if kakuro[new_i][j_entrada] == 0:
             new_i -= 1
@@ -330,11 +353,16 @@ def posibles(i_entrada, j_entrada, kakuro):
             break
         else:
             for x in range(0, len(kakuro[new_i][j_entrada][0][1])):
+                #print(kakuro[new_i][j_entrada][0][1])
                 conjunto_temp = kakuro[new_i][j_entrada][0][1][x]
-                conjunto_temp = set(conjunto_temp)
+                if type(conjunto_temp) == int:
+                    conjunto_temp = {conjunto_temp}
+                else:
+                    conjunto_temp = set(conjunto_temp)
                 # Unimos los conjuntos
                 nuevo_conjunto = nuevo_conjunto | conjunto_temp
     new_j = j_entrada - 1
+    #print("Abajo")
     for y in range(0, len(kakuro)):
         if kakuro[i_entrada][new_j] == 0:
             new_j -= 1
@@ -345,13 +373,18 @@ def posibles(i_entrada, j_entrada, kakuro):
             break
         else:
             for x in range(0, len(kakuro[i_entrada][new_j][1][1])):
+                #print(kakuro[i_entrada][new_j][1][1])
                 conjunto_temp = kakuro[i_entrada][new_j][1][1][x]
-                conjunto_temp = set(conjunto_temp)
+                if type(conjunto_temp) == int:
+                    conjunto_temp = {conjunto_temp}
+                else:
+                    conjunto_temp = set(conjunto_temp)
                 # Unimos los conjuntos
                 nuevo_conjunto = nuevo_conjunto | conjunto_temp
     return nuevo_conjunto
-        
-                
+################################################################################
+       
+
              
             
         
