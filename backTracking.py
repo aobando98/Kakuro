@@ -279,8 +279,8 @@ def fullPrePoda(kakuro):
     kakuro_comb = kakuro
     # Desde uno porque en la primera fila no se pueden poner numeros
     # el - 1 es porque la ultima columna es de ceros y la ultima fila tambien 
-    for i in range(1, len(kakuro) - 1):
-        for j in range(0, len(kakuro[0]) - 1):
+    for i in range(1, len(kakuro)):
+        for j in range(0, len(kakuro[0])):
             # En este caso si ejecutamos la pre poda
             if kakuro[i][j] == 0:
                 kakuro[i][j] = posibles(i, j, kakuro_comb)
@@ -289,7 +289,7 @@ def fullPrePoda(kakuro):
             elif kakuro[i][j][1] == 0:
                 pass
             elif kakuro[i][j][1][0] != 0:
-                for x in range(j + 1, len(kakuro[0]) - 1):
+                for x in range(j + 1, len(kakuro[0])):
                     # Empezamos a probar con cada espacio blanco
                     if kakuro[i][x] == 0:
                         # Si el espacio esta en blanco probamos las intersecciones
