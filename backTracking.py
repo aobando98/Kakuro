@@ -299,8 +299,7 @@ antes
 def fullPrePoda(kakuro):
     kakuro = preBackTracking(kakuro)
     kakuro_comb = kakuro
-    # Desde uno porque en la primera fila no se pueden poner numeros
-    # el - 1 es porque la ultima columna es de ceros y la ultima fila tambien 
+    # Desde uno porque en la primera fila no se pueden poner numeros 
     for i in range(1, len(kakuro)):
         for j in range(0, len(kakuro[0])):
             # En este caso si ejecutamos la pre poda
@@ -342,7 +341,6 @@ def fullPrePoda(kakuro):
 def posibles(i_entrada, j_entrada, kakuro):
     nuevo_conjunto = set()
     new_i = i_entrada - 1
-    #print("Arriba")
     for x in range(0, len(kakuro[0])):
         if kakuro[new_i][j_entrada] == 0:
             new_i -= 1
@@ -353,7 +351,6 @@ def posibles(i_entrada, j_entrada, kakuro):
             break
         else:
             for x in range(0, len(kakuro[new_i][j_entrada][0][1])):
-                #print(kakuro[new_i][j_entrada][0][1])
                 conjunto_temp = kakuro[new_i][j_entrada][0][1][x]
                 if type(conjunto_temp) == int:
                     conjunto_temp = {conjunto_temp}
@@ -362,7 +359,6 @@ def posibles(i_entrada, j_entrada, kakuro):
                 # Unimos los conjuntos
                 nuevo_conjunto = nuevo_conjunto | conjunto_temp
     new_j = j_entrada - 1
-    #print("Abajo")
     for y in range(0, len(kakuro)):
         if kakuro[i_entrada][new_j] == 0:
             new_j -= 1
@@ -373,7 +369,6 @@ def posibles(i_entrada, j_entrada, kakuro):
             break
         else:
             for x in range(0, len(kakuro[i_entrada][new_j][1][1])):
-                #print(kakuro[i_entrada][new_j][1][1])
                 conjunto_temp = kakuro[i_entrada][new_j][1][1][x]
                 if type(conjunto_temp) == int:
                     conjunto_temp = {conjunto_temp}
@@ -383,8 +378,114 @@ def posibles(i_entrada, j_entrada, kakuro):
                 nuevo_conjunto = nuevo_conjunto | conjunto_temp
     return nuevo_conjunto
 ################################################################################
-       
 
+def revisarFilaIzq(kakuro,i,j, numeroCasilla):
+    for x in range(0, len(kakuro[0])):
+        j -= 1
+        if type(kakuro[i][j]) == int:
+            if numeroCasilla == kakuro[i][j]:
+                return False
+        else:
+            break
+    return  True
+################################################################################
+
+def revisarFilaDer(kakuro,i,j, numeroCasilla):
+    for x in range(j + 1, len(kakuro[0])):
+        if type(kakuro[i][x]) == int:
+            if numeroCasilla == kakuro[i][x]:
+                return False
+        else:
+            break
+    return  True
+################################################################################
+
+def revisarColumArri(kakuro, i, j, numeroCasilla):
+    for x in range(0, len(kakuro)):
+        i -= 1
+        if type(kakuro[i][j]) == int:
+            if numeroCasilla == kakuro[i][j]:
+                return False
+        else:
+            break
+    return True
+################################################################################
+
+def revisarColumAbaj(kakuro, i, j, numeroCasilla):
+    for x in range(i + 1, len(kakuro[0])):
+        if type(kakuro[x][j]) == int:
+            if numeroCasilla == kakuro[x][j]:
+                return False
+        else:
+            break
+    return True
+################################################################################
+
+def verificarTuplaCol(kakuro, i, j, sumaColumna):
+    for x in range(i + 1, len(kakuro)):
+        if type(kakuro[x][j]) == int:
+            sumaColumna -= kakuro[x][j]
+        else:
+            break
+    if sumaColumna == 0:
+        return True
+    else:
+        return False
+################################################################################
+    
+def verificarTuplaFila(kakuro, i, j, sumaFila):
+    for x in range(j + 1, len(kakuro[0])):
+        if type(kakuro[i][x]) == int:
+            sumaFila -= kakuro[i][x]
+        else:
+            break
+    if sumaFila == 0:
+        return True
+    else:
+        return False
+################################################################################
+
+
+'''
+Funcion para verificar que un kakuro este bien resuelto
+'''
+def checkKakuro(kakuro):
+    # Recorremos todas las casillas 
+    for i in range(0, len(kakuro)):
+        for j in range(0, len(kakuro[0])):
+            if kakuro[i][j] == [0,0]:
+                # En este caso no se revisa nada
+                pass
+            elif type(kakuro[i][j]) == int:
+                # En este caso buscamos numeros repetidos
+                if (revisarFilaIzq(kakuro, i, j, kakuro[i][j]) == True
+                    and revisarFilaDer(kakuro, i, j, kakuro[i][j]) == True
+                    and revisarColumArri(kakuro, i, j, kakuro[i][j]) == True
+                    and revisarColumAbaj(kakuro, i, j, kakuro[i][j]) == True):
+                    pass
+                else:
+                    # Si esta repetido el kakuro esta malo
+                    return False
+            else:
+                # En este caso revisamos las sumas de cada tupla
+                if kakuro[i][j][0] == 0:
+                    pass
+                else:
+                    # Se ejecuta la revision de la columna
+                    if verificarTuplaCol(kakuro, i, j, kakuro[i][j][0][0]):
+                        pass
+                    else:
+                        return False
+                if kakuro[i][j][1] == 0:
+                    pass
+                else:
+                    # Se ejecuta la revision de la fila
+                    if verificarTuplaFila(kakuro, i, j, kakuro[i][j][1][0]):
+                        pass
+                    else:
+                        return False
+    return True
+            
              
             
         
