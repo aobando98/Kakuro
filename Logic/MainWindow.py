@@ -5,12 +5,13 @@ import Tkinter as tk
 from Tkinter import StringVar, Tk, Spinbox, Button
 from _tkinter import mainloop
 from cgitb import text
-from __builtin__ import str
 from pipes import stepkinds
 from _ast import Str
 from getpass import fallback_getpass
 import tkFileDialog
 import tkMessageBox
+import _ast
+import ast
 
 
 
@@ -112,8 +113,9 @@ vector_2: where we check if the number are in, must be a list
 returns: True if we can delete the given vector, False if we can't
 '''
 def checkPosRemove(vector_1, vector_2):
+    if type(vector_1) == int or type(vector_2) == int:
+        return False
     for x in range(0, len(vector_1)):
-        print(vector_1)
         if vector_1[x] in vector_2:
             return False
     return True
@@ -253,7 +255,7 @@ insertar x en todas las posiciones de lst.
 """
 def inserta_multiple(x, lst):
     return [inserta(x, lst, i) for i in range(len(lst) + 1)]
-###############################################################
+#------------------------------------------------------------------------------------------------------------
 
 """
 Calcula y devuelve una lista con todas las
@@ -264,9 +266,8 @@ def permuta(c):
     if len(c) == 0:
         return [[]]
     return sum([inserta_multiple(c[0], s)
-                for s in permuta(c[1:])],
-               [])
-###############################################################
+                for s in permuta(c[1:])],[])
+#------------------------------------------------------------------------------------------------------------
 
 '''
 Funcion para saber si un campo de una fila se comparte con una columna
@@ -285,7 +286,7 @@ def interseccion(i_entrada, j_entrada, kakuro):
             return None
         else:
             return [new_i, j_entrada]
-###############################################################
+#------------------------------------------------------------------------------------------------------------
 
 '''
 Funcion para ejecutar toda la pre poda
@@ -296,8 +297,8 @@ def fullPrePoda(kakuro):
     kakuro_comb = kakuro
     # Desde uno porque en la primera fila no se pueden poner numeros
     # el - 1 es porque la ultima columna es de ceros y la ultima fila tambien 
-    for i in range(1, len(kakuro) - 1):
-        for j in range(0, len(kakuro[0]) - 1):
+    for i in range(1, len(kakuro)):
+        for j in range(0, len(kakuro[0])):
             # En este caso si ejecutamos la pre poda
             if kakuro[i][j] == 0:
                 kakuro[i][j] = posibles(i, j, kakuro_comb)
@@ -306,7 +307,7 @@ def fullPrePoda(kakuro):
             elif kakuro[i][j][1] == 0:
                 pass
             elif kakuro[i][j][1][0] != 0:
-                for x in range(j + 1, len(kakuro[0]) - 1):
+                for x in range(j + 1, len(kakuro[0])):
                     # Empezamos a probar con cada espacio blanco
                     if kakuro[i][x] == 0:
                         # Si el espacio esta en blanco probamos las intersecciones
@@ -332,11 +333,12 @@ def fullPrePoda(kakuro):
                 kakuro[i][j]= list(kakuro[i][j])
                    
     return kakuro
-################################################################################
+#------------------------------------------------------------------------------------------------------------
 
 def posibles(i_entrada, j_entrada, kakuro):
     nuevo_conjunto = set()
     new_i = i_entrada - 1
+    #print("Arriba")
     for x in range(0, len(kakuro[0])):
         if kakuro[new_i][j_entrada] == 0:
             new_i -= 1
@@ -347,11 +349,16 @@ def posibles(i_entrada, j_entrada, kakuro):
             break
         else:
             for x in range(0, len(kakuro[new_i][j_entrada][0][1])):
+                #print(kakuro[new_i][j_entrada][0][1])
                 conjunto_temp = kakuro[new_i][j_entrada][0][1][x]
-                conjunto_temp = set(conjunto_temp)
+                if type(conjunto_temp) == int:
+                    conjunto_temp = {conjunto_temp}
+                else:
+                    conjunto_temp = set(conjunto_temp)
                 # Unimos los conjuntos
                 nuevo_conjunto = nuevo_conjunto | conjunto_temp
     new_j = j_entrada - 1
+    #print("Abajo")
     for y in range(0, len(kakuro)):
         if kakuro[i_entrada][new_j] == 0:
             new_j -= 1
@@ -362,11 +369,17 @@ def posibles(i_entrada, j_entrada, kakuro):
             break
         else:
             for x in range(0, len(kakuro[i_entrada][new_j][1][1])):
+                #print(kakuro[i_entrada][new_j][1][1])
                 conjunto_temp = kakuro[i_entrada][new_j][1][1][x]
-                conjunto_temp = set(conjunto_temp)
+                if type(conjunto_temp) == int:
+                    conjunto_temp = {conjunto_temp}
+                else:
+                    conjunto_temp = set(conjunto_temp)
                 # Unimos los conjuntos
                 nuevo_conjunto = nuevo_conjunto | conjunto_temp
     return nuevo_conjunto
+#------------------------------------------------------------------------------------------------------------
+               
     
     
 def matrizEditable(matrizKakuroFinal):
@@ -390,45 +403,19 @@ def saveFile(matrizKakuro):
     f.write(txtSave)
     f.close()
     tkMessageBox.showinfo("Manejo de Arhivos", "Kakuro Guardado")
+    
+    
 def openFile():
-    
+    a= ""
+    matrizGuardada = []
     filename = tkFileDialog.askopenfile(filetypes=[("Text files","*.txt")])
-    txt = filename.read()   
-    for i,row in enumerate(txt):
-        for j,column in enumerate(row):
-            if type(txt[i][j])!=list:   
-                L = tk.Label(gameframe,text='    ',bg= "gray")
-                L.grid(row=i,column=j,padx='1',pady='1')
-            else:
-                L = tk.Label(gameframe,text=(txt[i][j]),bg= "black", fg= "gray")
-                L.grid(row=i,column=j,padx='1',pady='1')
-    
+    txt = filename.read()
+    matrizGuardada = ast.literal_eval(txt)
+    redraw(matrizGuardada)
     filename.close()
-#------------------------------------------------------------------------------------------------------------
-
-
-
-
-#Dibuja el tablero en la pantalla----------------------------------------------------------------------------
-def redraw(matrix):
-
-
-    gameframe.destroy()  
-    global gameframe
-    gameframe = tk.Frame(window)
-    gameframe.pack()
     
-    for i,row in enumerate(matrix):
-        for j,column in enumerate(row):
-            if type(matrix[i][j])!=list:   
-                L = tk.Label(gameframe,text='    ',bg= "gray")
-                L.grid(row=i,column=j,padx='1',pady='1')
-            else:
-                L = tk.Label(gameframe,text=(matrix[i][j]),bg= "black", fg= "gray")
-                L.grid(row=i,column=j,padx='1',pady='1')
-                          
-#Genera las tuplas correspondientes a la sumas de las filas y columnas---------------------------------------------------------------------------
-
+#------------------------------------------------------------------------------------------------------------
+#------------------------------------------------------------------------------------------------------------
 def podaX(tablero,i,j,valor):
     contador = 1
     #izquierda
@@ -459,8 +446,29 @@ def podaX(tablero,i,j,valor):
                 tablero[i+contador][j].remove(valor)
         contador+=1
     return tablero
+#------------------------------------------------------------------------------------------------------------------------------------------------
+
+#Dibuja el tablero en la pantalla----------------------------------------------------------------------------
+def redraw(matrix):
 
 
+    gameframe.destroy()  
+    global gameframe
+    gameframe = tk.Frame(window)
+    gameframe.pack()
+    
+    for i,row in enumerate(matrix):
+        for j,column in enumerate(row):
+            if type(matrix[i][j])!=list:   
+                L = tk.Label(gameframe,text='    ',bg= "gray")
+                L.grid(row=i,column=j,padx='1',pady='1')
+            else:
+                L = tk.Label(gameframe,text=(matrix[i][j]),bg= "black", fg= "gray")
+                L.grid(row=i,column=j,padx='1',pady='1')
+#------------------------------------------------------------------------------------------------------------
+                          
+
+#Genera las tuplas correspondientes a la sumas de las filas y columnas---------------------------------------------------------------------------
 def generarTuplas(matrizFinal):
     
     print(len(matrizFinal))
@@ -673,25 +681,18 @@ def crearMatriz(filas, columnas):
     matrizFinal=   validar9Casillas(matrizInicial) #Obtiene todas las validaciones respectivas
     matrizKakuroFinal = matrizFinal[:]
     redraw(matrizKakuroFinal)
-    prueba1 =  matrizEditable(matrizKakuroFinal)
     
-    '''  
+    prueba1 =  matrizEditable(matrizKakuroFinal)
+    #full =  fullPrePoda(matrizFinal)
+    
+    
     #Imprime matriz en consola        
     for k in range(filas):
         for j in range(columnas):
-            a+=str(matrizFinal[k][j])+'\t'
+            a+=str(prueba1[k][j])+'\t'
         print (a)
         a=""
-    print ("\n")
-    print ("\n")      
-    for k in range(filas):
-        for j in range(columnas):
-            b+=str(prueba1[k][j])+'\t'
-        print (b)
-        b="" 
-    '''
-    print(matrizFinal)
-    fullPrePoda(matrizFinal)
+
 #--------------------------------------------------------------------------------------         
 
 #Funcion que obtiene del spinbox el tamano del kakuro----------------------------------
