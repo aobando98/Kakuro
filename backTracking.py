@@ -246,7 +246,7 @@ def preBackTracking(kakuro):
                 
 """
 Devuelve una nueva lista resultado de insertar
-x dentro de lst en la posición i.
+numero dentro de lista en la posicion indice.
 """
 def inserta(numero, lista, indice):
     return lista[:indice] + [numero] + lista[indice:]
@@ -254,7 +254,7 @@ def inserta(numero, lista, indice):
 
 """
 Devuelve una lista con el resultado de
-insertar x en todas las posiciones de lst.  
+insertar numero en todas las posiciones de lista.  
 """
 def inserta_multiple(numero, lista):
     listaFinal = []
@@ -263,26 +263,25 @@ def inserta_multiple(numero, lista):
     return listaFinal
 ###############################################################
 
-"""
-Calcula y devuelve una lista con todas las
-permutaciones posibles que se pueden hacer
-con los elementos contenidos en c.
-"""
+
+'''
+Funcion de permutaciones para una lista
+'''
 def permuta(lista):
-    if len(lista) == 0:
-        return [[]]
-    for nuevaLista in permuta(lista[1:]):
-        '''
-        print("Numero: ")
-        print(lista[0])
-        print("Nueva Lista: ")
-        print(nuevaLista)
-        print("Resultado: ")
-        print(inserta_multiple(lista[0], nuevaLista))
-        '''
-    return sum([inserta_multiple(lista[0], nuevaLista)
-                for nuevaLista in permuta(lista[1:])],
-               [])
+    resultado = []
+    for x in range(0, len(lista)):
+        # Si esta vacia
+        if len(resultado) == 0:
+            resultado.append([lista[x]])
+        else:
+            resultado_temp = []
+            for y in range(0, len(resultado)):
+                resultado_temp = inserta_multiple(lista[x], resultado[y])
+                resultado += resultado_temp
+
+    for y in range(0, len(resultado)):
+        if len(resultado[y]) == len(lista):
+            return resultado[y:]
 ###############################################################
 
 '''
