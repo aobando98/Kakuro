@@ -248,16 +248,19 @@ def preBackTracking(kakuro):
 Devuelve una nueva lista resultado de insertar
 x dentro de lst en la posición i.
 """
-def inserta(x, lst, i):
-    return lst[:i] + [x] + lst[i:]
+def inserta(numero, lista, indice):
+    return lista[:indice] + [numero] + lista[indice:]
 ###############################################################
 
 """
 Devuelve una lista con el resultado de
 insertar x en todas las posiciones de lst.  
 """
-def inserta_multiple(x, lst):
-    return [inserta(x, lst, i) for i in range(len(lst) + 1)]
+def inserta_multiple(numero, lista):
+    listaFinal = []
+    for x in range(0, len(lista) + 1):
+        listaFinal += [inserta(numero, lista, x)]
+    return listaFinal
 ###############################################################
 
 """
@@ -265,11 +268,20 @@ Calcula y devuelve una lista con todas las
 permutaciones posibles que se pueden hacer
 con los elementos contenidos en c.
 """
-def permuta(c):
-    if len(c) == 0:
+def permuta(lista):
+    if len(lista) == 0:
         return [[]]
-    return sum([inserta_multiple(c[0], s)
-                for s in permuta(c[1:])],
+    for nuevaLista in permuta(lista[1:]):
+        '''
+        print("Numero: ")
+        print(lista[0])
+        print("Nueva Lista: ")
+        print(nuevaLista)
+        print("Resultado: ")
+        print(inserta_multiple(lista[0], nuevaLista))
+        '''
+    return sum([inserta_multiple(lista[0], nuevaLista)
+                for nuevaLista in permuta(lista[1:])],
                [])
 ###############################################################
 
@@ -281,7 +293,7 @@ retorna: None si no se comparte
 def interseccion(i_entrada, j_entrada, kakuro):
     new_i = i_entrada - 1
     for x in range(0, len(kakuro[0])):
-        if kakuro[new_i][j_entrada] == 0:
+        if type(kakuro[new_i][j_entrada]) == int:
             new_i -= 1
         elif type(kakuro[new_i][j_entrada]) == set:
             new_i -= 1
@@ -290,6 +302,49 @@ def interseccion(i_entrada, j_entrada, kakuro):
             return None
         else:
             return [new_i, j_entrada]
+###############################################################
+
+'''
+Funcion para colocar los numeros que solo se pueden en un campo
+'''
+def colocaFijos(kakuro):
+    for i in range(0, len(kakuro)):
+        for j in range(0, len(kakuro[0])):
+            #print(kakuro[i][j])
+            if type(kakuro[i][j]) == int:
+                pass
+            elif kakuro[i][j] == [0,0]:
+                pass
+            # Caso para cuando son los posibles numeros
+            elif type(kakuro[i][j]) == set:
+                pass
+            # Caso cuando tiene dos numeros por poner en la casilla 
+            elif kakuro[i][j][0] != 0 and kakuro[i][j][1] != 0:
+                if (len(kakuro[i][j][0][1]) == 1
+                    and type(kakuro[i][j][0][1][0]) == int):
+                    # Si solo tiene un numero lo pongo
+                    kakuro[i+1][j] = kakuro[i][j][0][1][0]
+                if (len(kakuro[i][j][1][1]) == 1
+                    and type(kakuro[i][j][1][1][0]) == int):
+                    # Si solo tiene un numero lo pongo
+                    kakuro[i][j+1] = kakuro[i][j][1][1][0]
+            # Caso cuando la columna tiene un numero
+            elif kakuro[i][j][0] != 0:
+                # Empezamos el analisis
+                if (len(kakuro[i][j][0][1]) == 1
+                    and type(kakuro[i][j][0][1][0]) == int):
+                    # Si solo tiene un numero lo pongo
+                    kakuro[i+1][j] = kakuro[i][j][0][1][0]
+                    
+            # Caso cuando la fila tiene un numero
+            elif kakuro[i][j][1] != 0:
+                # Empezamos el analisis
+                if (len(kakuro[i][j][1][1]) == 1
+                    and type(kakuro[i][j][1][1][0]) == int):
+                    # Si solo tiene un numero lo pongo
+                    kakuro[i][j+1] = kakuro[i][j][1][1][0]
+    return kakuro
+            
 ###############################################################
 
 '''
@@ -304,10 +359,13 @@ def fullPrePoda(kakuro):
         for j in range(0, len(kakuro[0])):
             # En este caso si ejecutamos la pre poda
             if kakuro[i][j] == 0:
+                # Encontramos los numeros que se pueden poner en esa casilla
                 kakuro[i][j] = posibles(i, j, kakuro_comb)
             elif kakuro [i][j] == [0,0]:
                 pass
             elif kakuro[i][j][1] == 0:
+                pass
+            elif kakuro[i][j][0] == 0:
                 pass
             elif kakuro[i][j][1][0] != 0:
                 for x in range(j + 1, len(kakuro[0])):
@@ -329,20 +387,23 @@ def fullPrePoda(kakuro):
             else:
                 pass
 
-
+    kakuro = colocaFijos(kakuro)
     for i in range(len(kakuro[0])):
         for j in range (len(kakuro[0])):
             if type(kakuro[i][j])==set:
                 kakuro[i][j]= list(kakuro[i][j])
-                   
     return kakuro
 ################################################################################
 
+'''
+Funcion que devuelve un conjunto con los numeros
+que se pueden poner en una casilla de juego
+'''
 def posibles(i_entrada, j_entrada, kakuro):
     nuevo_conjunto = set()
     new_i = i_entrada - 1
     for x in range(0, len(kakuro[0])):
-        if kakuro[new_i][j_entrada] == 0:
+        if type(kakuro[new_i][j_entrada]) == int:
             new_i -= 1
         elif type(kakuro[new_i][j_entrada]) == set:
             new_i -= 1
@@ -379,6 +440,10 @@ def posibles(i_entrada, j_entrada, kakuro):
     return nuevo_conjunto
 ################################################################################
 
+'''
+Funcion para revisar que el numero no este repetido
+hacia la izquierda 
+'''
 def revisarFilaIzq(kakuro,i,j, numeroCasilla):
     for x in range(0, len(kakuro[0])):
         j -= 1
@@ -390,6 +455,10 @@ def revisarFilaIzq(kakuro,i,j, numeroCasilla):
     return  True
 ################################################################################
 
+'''
+Funcion para revisar que el numero no este repetido
+hacia la derecha
+'''
 def revisarFilaDer(kakuro,i,j, numeroCasilla):
     for x in range(j + 1, len(kakuro[0])):
         if type(kakuro[i][x]) == int:
@@ -400,6 +469,10 @@ def revisarFilaDer(kakuro,i,j, numeroCasilla):
     return  True
 ################################################################################
 
+'''
+Funcion para revisar que el numero no este repetido
+hacia arriba
+'''
 def revisarColumArri(kakuro, i, j, numeroCasilla):
     for x in range(0, len(kakuro)):
         i -= 1
@@ -411,6 +484,10 @@ def revisarColumArri(kakuro, i, j, numeroCasilla):
     return True
 ################################################################################
 
+'''
+Funcion para revisar que el numero no este repetido
+hacia abajo
+'''
 def revisarColumAbaj(kakuro, i, j, numeroCasilla):
     for x in range(i + 1, len(kakuro[0])):
         if type(kakuro[x][j]) == int:
@@ -421,6 +498,9 @@ def revisarColumAbaj(kakuro, i, j, numeroCasilla):
     return True
 ################################################################################
 
+'''
+Funcion para verificar la suma de una Columna
+'''
 def verificarTuplaCol(kakuro, i, j, sumaColumna):
     for x in range(i + 1, len(kakuro)):
         if type(kakuro[x][j]) == int:
@@ -432,7 +512,10 @@ def verificarTuplaCol(kakuro, i, j, sumaColumna):
     else:
         return False
 ################################################################################
-    
+
+'''
+Funcion para verificar la suma de una Fila
+'''    
 def verificarTuplaFila(kakuro, i, j, sumaFila):
     for x in range(j + 1, len(kakuro[0])):
         if type(kakuro[i][x]) == int:
